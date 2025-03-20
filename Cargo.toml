@@ -1,0 +1,13 @@
+[package]
+name = "dependency-injection"
+authors = ["Joshua You <joshua@joshuayou.dev>"]
+version = "0.1.0"
+edition = "2024"
+
+[features]
+dev = []
+
+[dependencies]
+reqwest = "0.12"
+tokio = { version = "1.44", features = ["macros", "rt-multi-thread"] }
+ureq = "3.0"
