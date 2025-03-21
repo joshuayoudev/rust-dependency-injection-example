@@ -40,6 +40,13 @@ mod tests {
         type DatabaseClient = TestDatabaseClient;
         type HttpClient = TestHttpClient;
 
+        fn new() -> Self {
+            TestDependencies {
+                database_client: TestDatabaseClient::new(),
+                http_client: TestHttpClient::new(),
+            }
+        }
+
         fn database_client(&mut self) -> &mut Self::DatabaseClient {
             &mut self.database_client
         }
@@ -51,10 +58,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_run_service_with_mocked_dependencies() {
-        let test_dependencies = TestDependencies {
-            database_client: TestDatabaseClient::new(),
-            http_client: TestHttpClient::new(),
-        };
+        let test_dependencies = TestDependencies::new();
 
         run_service(test_dependencies).await;
     }

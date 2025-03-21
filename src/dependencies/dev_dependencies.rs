@@ -7,18 +7,16 @@ pub struct DevDependencies {
     http_client: UreqHttpClient,
 }
 
-impl DevDependencies {
-    pub fn new() -> DevDependencies {
+impl Dependencies for DevDependencies {
+    type DatabaseClient = HashMapDatabaseClient;
+    type HttpClient = UreqHttpClient;
+
+    fn new() -> Self {
         DevDependencies {
             database_client: HashMapDatabaseClient::new(),
             http_client: UreqHttpClient::new(),
         }
     }
-}
-
-impl Dependencies for DevDependencies {
-    type DatabaseClient = HashMapDatabaseClient;
-    type HttpClient = UreqHttpClient;
 
     fn database_client(&mut self) -> &mut Self::DatabaseClient {
         &mut self.database_client

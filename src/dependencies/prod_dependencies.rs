@@ -7,18 +7,16 @@ pub struct ProdDependencies {
     http_client: ReqwestHttpClient,
 }
 
-impl ProdDependencies {
-    pub fn new() -> ProdDependencies {
+impl Dependencies for ProdDependencies {
+    type DatabaseClient = BTreeMapDatabaseClient;
+    type HttpClient = ReqwestHttpClient;
+
+    fn new() -> Self {
         ProdDependencies {
             database_client: BTreeMapDatabaseClient::new(),
             http_client: ReqwestHttpClient::new(),
         }
     }
-}
-
-impl Dependencies for ProdDependencies {
-    type DatabaseClient = BTreeMapDatabaseClient;
-    type HttpClient = ReqwestHttpClient;
 
     fn database_client(&mut self) -> &mut Self::DatabaseClient {
         &mut self.database_client
