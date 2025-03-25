@@ -14,7 +14,7 @@ impl TestHttpClient {
 
 impl HttpClient for TestHttpClient {
     async fn get(&self, _request: HttpRequest) -> HttpResponse {
-        println!("TestHttpClient");
+        println!("[TEST] TestHttpClient");
 
         HttpResponse::new(TEST_BODY.as_bytes().to_vec())
     }

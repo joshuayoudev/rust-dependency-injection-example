@@ -16,7 +16,7 @@ impl UreqHttpClient {
 
 impl HttpClient for UreqHttpClient {
     async fn get(&self, request: HttpRequest) -> HttpResponse {
-        println!("UreqHttpClient");
+        println!("[BETA] UreqHttpClient");
 
         let client = self.client.clone();
 

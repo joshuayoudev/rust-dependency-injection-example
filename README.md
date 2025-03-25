@@ -3,6 +3,20 @@
 This example shows how to do dependency injection in Rust natively without 3rd party crates and without dynamic
 dispatching.
 
+To try out these examples, simply run these commands:
+
+```sh
+cargo run
+```
+
+```sh
+cargo run --features beta
+```
+
+```sh
+cargo test -- --nocapture
+```
+
 # Starting With The Naive Approach
 
 Anyone who has tried to tackle this problem likely started with the same idea - use traits to create interfaces for
@@ -32,14 +46,14 @@ trait FooDependency {}
 struct ProdFoo;
 impl FooDependency for ProdFoo {}
 
-struct DevFoo;
-impl FooDependency for DevFoo {}
+struct BetaFoo;
+impl FooDependency for BetaFoo {}
 
 fn main() {
     let prod_foo = ProdFoo;
-    let dev_foo = DevFoo;
+    let beta_foo = BetaFoo;
 
-    do_the_thing(prod_foo); // How do I change this to `dev_foo` for developer environments?
+    do_the_thing(prod_foo); // How do I change this to `beta_foo` for beta environments?
 }
 ```
 
@@ -62,7 +76,7 @@ Could become:
 ```rs
 fn do_the_thing_prod_foo(foo: ProdFoo) {}
 
-fn do_the_thing_dev_foo(foo: DevFoo) {}
+fn do_the_thing_beta_foo(foo: BetaFoo) {}
 ```
 
 Now imagine you have 20 dependencies, each dependency has 3 different implementations, and most of your functions
@@ -189,29 +203,29 @@ impl Dependencies for ProdDependencies {
 ```
 
 ```rs
-impl DependencyA for DevDependencyA {}
+impl DependencyA for BetaDependencyA {}
 
-impl DependencyB for DevDependencyB {}
+impl DependencyB for BetaDependencyB {}
 
-pub struct DevDependencies {
-    dev_dependency_a: DevDependencyA,
-    dev_dependency_b: DevDependencyB,
+pub struct BetaDependencies {
+    beta_dependency_a: BetaDependencyA,
+    beta_dependency_b: BetaDependencyB,
 }
 
-impl Dependencies for DevDependencies {
-    type DepA = DevDependencyA;
-    type DepB = DevDependencyB;
+impl Dependencies for BetaDependencies {
+    type DepA = BetaDependencyA;
+    type DepB = BetaDependencyB;
 
     fn new() -> Self {
         // initialize dependencies..
     }
 
     fn dependency_a(&self) -> &Self::DepA {
-        &self.dev_dependency_a
+        &self.beta_dependency_a
     }
 
     fn dependency_b(&self) -> &Self::DepB {
-        &self.dev_dependency_b
+        &self.beta_dependency_b
     }
 }
 ```
@@ -220,15 +234,15 @@ Now, we can use Rust's **feature flags** and **export aliasing** to make it so t
 container available to the program:
 
 ```rs
-#[cfg(feature = "dev")]
-mod dev_dependencies;
+#[cfg(feature = "beta")]
+mod beta_dependencies;
 
 mod prod_dependencies;
 
-#[cfg(feature = "dev")]
-pub use dev_dependencies::DevDependencies as ServiceDependencies;
+#[cfg(feature = "beta")]
+pub use beta_dependencies::BetaDependencies as ServiceDependencies;
 
-#[cfg(not(feature = "dev"))]
+#[cfg(not(feature = "beta"))]
 pub use prod_dependencies::ProdDependencies as ServiceDependencies;
 ```
 
@@ -236,7 +250,7 @@ pub use prod_dependencies::ProdDependencies as ServiceDependencies;
 # Cargo.toml
 
 [features]
-dev = []
+beta = []
 ```
 
 That's it! Let's see what the usage looks like:
@@ -257,7 +271,7 @@ fn execute(dependencies: impl Dependencies) {
 
 ```sh
 cargo run
-cargo run --features dev
+cargo run --features beta
 ```
 
 # Notes
@@ -277,18 +291,18 @@ copy / pasted some comments from the code example:
 // Note 2: Code locked behind feature flags will be grayed out / lose intellisense support. A
 //         workaround is to use the `any()` check and include the `test` flag. IDEs by default seem
 //         to use the `test` flag during development, thus keeping the intellisense.
-#[cfg(any(feature = "dev", test))]
-mod dev_dependencies;
+#[cfg(any(feature = "beta", test))]
+mod beta_dependencies;
 
 mod prod_dependencies;
 
 // Note: In this case, we cannot use the `any()` + `test` trick as it will cause the IDE to see 2
 //       `ServiceDependencies`
-#[cfg(feature = "dev")]
-pub use dev_dependencies::DevDependencies as ServiceDependencies;
+#[cfg(feature = "beta")]
+pub use beta_dependencies::BetaDependencies as ServiceDependencies;
 
 // Note: We must include this `not()` check, otherwise the program will see multiple
 //       `ServiceDependencies` for any non-production environments
-#[cfg(not(any(feature = "dev")))]
+#[cfg(not(any(feature = "beta")))]
 pub use prod_dependencies::ProdDependencies as ServiceDependencies;
 ```

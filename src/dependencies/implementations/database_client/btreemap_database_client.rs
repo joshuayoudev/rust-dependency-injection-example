@@ -18,7 +18,7 @@ impl BTreeMapDatabaseClient {
 
 impl DatabaseClient for BTreeMapDatabaseClient {
     fn put(&mut self, key: Key, value: Value) {
-        println!("BTreeMapDatabaseClient");
+        println!("[PROD] BTreeMapDatabaseClient");
         self.database.insert(key.0, value.0);
     }
 }

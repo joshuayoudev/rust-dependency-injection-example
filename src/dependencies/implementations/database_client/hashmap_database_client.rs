@@ -18,7 +18,7 @@ impl HashMapDatabaseClient {
 
 impl DatabaseClient for HashMapDatabaseClient {
     fn put(&mut self, key: Key, value: Value) {
-        println!("HashMapDatabaseClient");
+        println!("[BETA] HashMapDatabaseClient");
         self.database.insert(key.0, value.0);
     }
 }

@@ -2,17 +2,17 @@ use super::Dependencies;
 use super::implementations::database_client::HashMapDatabaseClient;
 use super::implementations::http_client::UreqHttpClient;
 
-pub struct DevDependencies {
+pub struct BetaDependencies {
     database_client: HashMapDatabaseClient,
     http_client: UreqHttpClient,
 }
 
-impl Dependencies for DevDependencies {
+impl Dependencies for BetaDependencies {
     type DatabaseClient = HashMapDatabaseClient;
     type HttpClient = UreqHttpClient;
 
     fn new() -> Self {
-        DevDependencies {
+        BetaDependencies {
             database_client: HashMapDatabaseClient::new(),
             http_client: UreqHttpClient::new(),
         }

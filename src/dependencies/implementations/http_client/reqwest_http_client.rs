@@ -16,7 +16,7 @@ impl ReqwestHttpClient {
 
 impl HttpClient for ReqwestHttpClient {
     async fn get(&self, request: HttpRequest) -> HttpResponse {
-        println!("ReqwestHttpClient");
+        println!("[PROD] ReqwestHttpClient");
 
         let response = self.client.get(request.uri()).send().await;
 

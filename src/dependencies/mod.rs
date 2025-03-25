@@ -9,19 +9,19 @@ pub mod traits;
 // Note 2: Code locked behind feature flags will be grayed out / lose intellisense support. A
 //         workaround is to use the `any()` check and include the `test` flag. IDEs by default seem
 //         to use the `test` flag during development, thus keeping the intellisense.
-#[cfg(any(feature = "dev", test))]
-mod dev_dependencies;
+#[cfg(any(feature = "beta", test))]
+mod beta_dependencies;
 
 mod prod_dependencies;
 
 // Note: In this case, we cannot use the `any()` + `test` trick as it will cause the IDE to see 2
 //       `ServiceDependencies`
-#[cfg(feature = "dev")]
-pub use dev_dependencies::DevDependencies as ServiceDependencies;
+#[cfg(feature = "beta")]
+pub use beta_dependencies::BetaDependencies as ServiceDependencies;
 
 // Note: We must include this `not()` check, otherwise the program will see multiple
 //       `ServiceDependencies` for any non-production environments
-#[cfg(not(any(feature = "dev")))]
+#[cfg(not(any(feature = "beta")))]
 pub use prod_dependencies::ProdDependencies as ServiceDependencies;
 
 pub trait Dependencies {

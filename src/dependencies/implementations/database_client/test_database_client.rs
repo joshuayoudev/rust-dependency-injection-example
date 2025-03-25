@@ -14,7 +14,7 @@ impl TestDatabaseClient {
 
 impl DatabaseClient for TestDatabaseClient {
     fn put(&mut self, key: Key, value: Value) {
-        println!("TestDatabaseClient");
+        println!("[TEST] TestDatabaseClient");
         self.database.push((key.0, value.0));
     }
 }
