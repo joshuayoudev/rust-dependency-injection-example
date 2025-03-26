@@ -177,7 +177,7 @@ pub trait Dependencies {
 ```
 
 This is a `trait` rather than a `struct` so that we can create different containers for different environments. The
-**associated types** are how we avoid carrying the generics in the trait definition:
+**associated types** are how we avoid sprinkling generics syntax everywhere:
 
 ```rs
 impl DependencyA for ProdDependencyA {}
@@ -291,7 +291,7 @@ cargo run --features beta
 If you need to swap out a dependency, just change type concrete type in the dependencies container:
 
 ```rs
-impl DependencyB for ANewProdDependencyB {} // UPDATED
+impl DependencyB for ANewProdDependencyB {} // NEW IMPLEMENTATION
 
 pub struct ProdDependencies {
     prod_dependency_a: ProdDependencyA,
