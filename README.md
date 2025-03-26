@@ -3,6 +3,11 @@
 This example shows how to do dependency injection in Rust natively without 3rd party crates and without dynamic
 dispatching.
 
+This repo is supplementary material for my blog post on DI in Rust: https://joshuayou.dev/blog/dependency-injection-in-rust/.
+
+If you have any questions, comments, or suggestions, see the [GitHub discussions thread for this
+topic](https://github.com/joshuayoudev/blog-discussions/discussions/3).
+
 To try out these examples, simply run these commands:
 
 ```sh
@@ -129,7 +134,7 @@ fn program_entry_point<
 }
 ```
 
-We could try fixing the bloat problem using trait objects, but that means we are now locked into dynamic dispatching:
+We could try fixing the bloat problem by using trait objects, but that means we are now locked into dynamic dispatching:
 
 ```rs
 struct Dependencies {
@@ -185,6 +190,8 @@ pub struct ProdDependencies {
 }
 
 impl Dependencies for ProdDependencies {
+
+    // Look! We can assign concrete types, no trait objects!
     type DepA = ProdDependencyA;
     type DepB = ProdDependencyB;
 
@@ -213,6 +220,8 @@ pub struct BetaDependencies {
 }
 
 impl Dependencies for BetaDependencies {
+
+    // Look! We can assign concrete types, no trait objects!
     type DepA = BetaDependencyA;
     type DepB = BetaDependencyB;
 
@@ -253,9 +262,14 @@ pub use prod_dependencies::ProdDependencies as ServiceDependencies;
 beta = []
 ```
 
-That's it! Let's see what the usage looks like:
+The cool thing about feature flags is that Rust will intelligently remove feature-specific code if that feature flag is
+not set. This means that no beta dependencies will ever be present in a production binary.
+
+And that's it! Let's see what the usage looks like:
 
 ```rs
+use crate::dependencies::ServiceDependencies;
+
 fn main() {
     let service_dependencies = ServiceDependencies::new();
 
@@ -274,10 +288,54 @@ cargo run
 cargo run --features beta
 ```
 
+If you need to swap out a dependency, just change type concrete type in the dependencies container:
+
+```rs
+impl DependencyB for ANewProdDependencyB {} // UPDATED
+
+pub struct ProdDependencies {
+    prod_dependency_a: ProdDependencyA,
+    prod_dependency_b: ANewProdDependencyB, // UPDATED
+}
+
+impl Dependencies for ProdDependencies {
+    type DepA = ProdDependencyA;
+    type DepB = ANewProdDependencyB; // UPDATED
+
+    // ...
+}
+```
+
+Need to mock dependencies for unit tests? Don't use 3rd party crates like [mockall](https://docs.rs/mockall/latest/mockall/),
+just create a new `TestDependencies` container!
+
+```rs
+#[cfg(test)]
+mod tests {
+    struct TestDependencies {
+        test_dependency_a: TestDependencyA,
+        test_dependency_b: TestDependencyB,
+    }
+
+    impl Dependencies for TestDependencies {
+        type DepA = TestDependencyA;
+        type DepB = TestDependencyB;
+
+        // ...
+    }
+
+    #[test]
+    fn test_execute() {
+        execute(TestDependencies::new());
+        // ...
+    }
+}
+```
+
 # Notes
 
-There are some minor gotchas that come with this approach, mainly around developer experience. For visibility, I have
-copy / pasted some comments from the code example:
+There are some minor gotchas that come with using feature flags. For visibility, I have copy / pasted some comments
+from the code example:
 
 ```rs
 // src/dependencies/mod.rs
